@@ -1,0 +1,95 @@
+name: Build & Deploy DidKit Package
+on:
+    workflow_dispatch:
+
+concurrency:
+    group: didkit-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    build-didkit:
+        permissions:
+            contents: 'read'
+            id-token: 'write'
+        name: Build DIDKit
+        runs-on: macos-latest
+        steps:
+            - name: Checkout Code
+              uses: actions/checkout@v3
+
+            - name: Setup JDK
+              uses: actions/setup-java@v3
+              with:
+                  java-version: '17'
+                  distribution: 'adopt'
+
+            - name: Setup Ruby
+              uses: ruby/setup-ruby@v1
+              with:
+                  ruby-version: 3.0.2
+                  bundler-cache: true
+
+            - name: Setup Flutter SDK
+              uses: subosito/flutter-action@v2.6.2
+              with:
+                  channel: 'stable'
+                  cache: true
+
+            - name: Setup Rust Toolchain
+              uses: actions-rs/toolchain@v1
+              with:
+                  profile: minimal
+                  toolchain: stable
+
+            - name: Setup Rust Cache
+              uses: Swatinem/rust-cache@v2
+              with:
+                  workspaces: |
+                      didkit
+                      ssi
+                  cache-on-failure: true
+
+            - name: Cache Flutter Pub Cache
+              uses: actions/cache@v3
+              with:
+                  path: ~/.pub-cache
+                  key: ${{ runner.os }}-flutter-pub-cache-${{ hashFiles('**/pubspec.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-flutter-pub-cache-
+
+            - name: Checkout DIDKit Code
+              uses: actions/checkout@v3
+              with:
+                  repository: 'spruceid/didkit'
+                  path: './didkit'
+
+            - name: Checkout SSI Code
+              uses: actions/checkout@v3
+              with:
+                  repository: 'spruceid/ssi'
+                  path: './ssi'
+                  submodules: recursive
+                  ref: '80be3ef98a68db75b5e8af32b258bc9d64374305'
+
+            - name: Setup NDK
+              uses: nttld/setup-ndk@v1
+              id: setup-ndk
+              with:
+                  ndk-version: r21e
+
+            - name: Compile DIDKit
+              working-directory: didkit
+              env:
+                  ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+              run: |
+                  export TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/darwin-x86_64
+                  export PATH=$PATH:$TOOLCHAIN/bin
+                  echo "Build didkit for iOS"
+                  make -C lib install-rustup-ios
+                  make -C lib ../target/test/ios.stamp
+                  echo "Build didkit for Android"
+                  make -C lib install-rustup-android
+                  make -C lib ../target/test/android.stamp
+                  cargo build
+
+            - uses: EndBug/add-and-commit@v9
