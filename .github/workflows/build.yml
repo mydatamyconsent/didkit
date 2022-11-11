@@ -9,7 +9,7 @@ concurrency:
 jobs:
     build-didkit:
         permissions:
-            contents: 'read'
+            contents: 'write'
             id-token: 'write'
         name: Build DIDKit
         runs-on: macos-latest
