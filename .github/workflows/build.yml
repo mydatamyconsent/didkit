@@ -90,6 +90,10 @@ jobs:
                   echo "Build didkit for Android"
                   make -C lib install-rustup-android
                   make -C lib ../target/test/android.stamp
+                  echo "Build didkit for Flutter"
+                  make -C lib ../target/test/flutter.stamp
+                  echo "Build didkit C Library"
+                  make -C lib ../target/test/c.stamp
                   cargo build
 
             - name: Publish Flutter Package
