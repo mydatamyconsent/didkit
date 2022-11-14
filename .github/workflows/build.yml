@@ -92,6 +92,8 @@ jobs:
                   make -C lib ../target/test/android.stamp
                   cargo build
 
-            - run: dart pub publish --dry-run
+            - name: Publish Flutter Package
+              run: dart pub publish --dry-run
+              working-directory: didkit/lib/flutter
 
             - uses: EndBug/add-and-commit@v9
