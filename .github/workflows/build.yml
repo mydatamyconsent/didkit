@@ -98,8 +98,9 @@ jobs:
 
 
             - name: Publish Flutter Package
+              working-directory: didkit/lib/flutter
               run: |
-                rm didkit/target/release/libdidkit.so
-                cd didkit/lib/flutter && dart pub publish --dry-run
+                rm libdidkit.so
+                dart pub publish --dry-run
 
             - uses: EndBug/add-and-commit@v9
