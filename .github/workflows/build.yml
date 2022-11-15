@@ -92,12 +92,14 @@ jobs:
                   make -C lib ../target/test/android.stamp
                   echo "Build didkit for Flutter"
                   make -C lib ../target/test/flutter.stamp
-                  echo "Build didkit C Library"
-                  make -C lib ../target/test/c.stamp
+                  echo "Build didkit Wasm Library"
+                  make -C lib ../target/test/wasm.stamp
                   cargo build
 
+
             - name: Publish Flutter Package
-              run: dart pub publish --dry-run
-              working-directory: didkit/lib/flutter
+              run: |
+                rm didkit/target/release/libdidkit.so
+                cd didkit/lib/flutter && dart pub publish --dry-run
 
             - uses: EndBug/add-and-commit@v9
