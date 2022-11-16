@@ -98,10 +98,16 @@ jobs:
                   cargo build
 
 
+            - name: Set Pub Dev Credentials
+              uses: k-paxian/dart-package-publisher@master
+              with:
+                accessToken: ${{ secrets.PUB_OAUTH_ACCESS_TOKEN }}
+                refreshToken: ${{ secrets.PUB_OAUTH_REFRESH_TOKEN }}
+
             - name: Publish Flutter Package
               working-directory: didkit/lib/flutter
               run: |
                 rm libdidkit.so
-                dart pub publish --dry-run
+                dart pub publish -f
 
             - uses: EndBug/add-and-commit@v9
