@@ -30,7 +30,7 @@ jobs:
                   bundler-cache: true
 
             - name: Setup Flutter SDK
-              uses: subosito/flutter-action@v2.6.2
+              uses: subosito/flutter-action@v2.9.1
               with:
                   channel: 'stable'
                   cache: true
